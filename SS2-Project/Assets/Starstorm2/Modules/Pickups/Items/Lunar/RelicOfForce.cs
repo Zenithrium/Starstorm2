@@ -32,8 +32,11 @@ namespace Moonstorm.Starstorm2.Items
             [ItemDefAssociation]
             private static ItemDef GetItemDef() => SS2Content.Items.RelicOfForce;
 
+            ForceHitToken EnemyToken;
+
             public void ModifyStatArguments(RecalculateStatsAPI.StatHookEventArgs args)
             {
+                //if (body.inventory) 
                 //args.damageMultAdd += damageMultiplier;
                 float penalty = MSUtil.InverseHyperbolicScaling(forcePenalty, forcePenalty, 0.9f, stack);
                 args.attackSpeedMultAdd -= penalty;
@@ -68,7 +71,12 @@ namespace Moonstorm.Starstorm2.Items
                         }
                         else
                         {
+                            if (EnemyToken)
+                            {
+                                Destroy(EnemyToken);
+                            }
                             token = damageReport.victim.body.gameObject.AddComponent<ForceHitToken>();
+                            EnemyToken = token;
                             token.CallMoreHits(damageReport, count);
                             //token = damageReport.victim.body.gameObject.GetComponent<ForceHitToken>();
                             //token.count = count;
@@ -115,7 +123,7 @@ namespace Moonstorm.Starstorm2.Items
         {
             //public int count = 0;
             //public DamageReport damageReport;
-            
+            public int hitCount = 0;
             private void Start()
             {
                 //StartCoroutine(RelicForceDelayedHits(damageReport, count));
@@ -123,6 +131,7 @@ namespace Moonstorm.Starstorm2.Items
 
             public void CallMoreHits(DamageReport damageReport, int count)
             {
+                hitCount++;
                 StartCoroutine(RelicForceDelayedHits(damageReport, count));
             }
 
@@ -133,10 +142,12 @@ namespace Moonstorm.Starstorm2.Items
                 var victimHealthComp = damageReport.victimBody.healthComponent;
                 var initalHit = damageReport.damageInfo;
 
+                float hitMult = hitCount * .05f;                
+
                 for (int i = 0; i < count; i++)
                 {
                     DamageInfo damageInfo = new DamageInfo();
-                    damageInfo.damage = damageReport.damageDealt * damageMultiplier;
+                    damageInfo.damage = damageReport.damageDealt * damageMultiplier * hitMult;
                     damageInfo.attacker = attacker;
                     damageInfo.inflictor = initalHit.inflictor;
                     damageInfo.force = Vector3.zero;
@@ -163,7 +174,7 @@ namespace Moonstorm.Starstorm2.Items
                         effectData.SetNetworkedObjectReference(victim.gameObject);
                         EffectManager.SpawnEffect(SS2Assets.LoadAsset<GameObject>("RelicOfForceHitEffect"), effectData, transmit: true);
                     }
-                    
+
                 }
             }
 

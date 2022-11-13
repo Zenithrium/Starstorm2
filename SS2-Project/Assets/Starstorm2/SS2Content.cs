@@ -142,6 +142,8 @@ namespace Moonstorm.Starstorm2
 
             public static BuffDef BuffCoffeeBag;
 
+            public static BuffDef BuffCoffeeBagConsumed;
+
             public static BuffDef BuffNeedle;
 
             public static BuffDef BuffNeedleBuildup;
